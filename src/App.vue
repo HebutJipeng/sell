@@ -1,19 +1,23 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <hello></hello>
+    <header></header>
+    <div class="tab">
+      I am tab
+    </div>
+    <div class="content">
+      I am content
+    </div>
   </div>
 </template>
 
 <script>
-import Hello from './components/Hello'
+  import header from './components/header/header.vue';
 
-export default {
-  name: 'app',
-  components: {
-    Hello
-  }
-}
+  export default {
+    components: {
+      header
+    }
+  };
 </script>
 
 <style>
