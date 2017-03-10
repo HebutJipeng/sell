@@ -13,7 +13,10 @@
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run"
   },
   "dependencies": {
-    "vue": "^2.1.0"
+    "vue": "^2.1.0",
+    "vue-router": "^2.3.0",
+    "vue-resource": "^1.2.1",
+    "better-scroll": "^0.1.15"
   },
   "devDependencies": {
     "autoprefixer": "^6.4.0",
