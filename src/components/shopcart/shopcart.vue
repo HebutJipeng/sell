@@ -1,6 +1,6 @@
 <template lang="html">
   <div class="shopcart">
-    <div class="content">
+    <div class="content" @click="toggleList">
       <div class="content-left">
           <div class="logo-wrapper">
             <div class="logo" :class="{'highlight': totalCount > 0}">
@@ -20,18 +20,38 @@
       </div>
     </div>
     <div class="ball-container">
-      <transition name="drop">
-        <div v-for="ball in balls" v-show="ball.show" class="ball">
-          <div class="inner">
-
+      <transition name="drop" v-for="ball in balls" @before-enter="beforeEnter" @enter="enter" @after-enter="afterEnter">
+        <div  v-show="ball.show" class="ball">
+          <div class="inner inner-hook">
           </div>
         </div>
       </transition>
+    </div>
+    <div class="shopcart-list" v-show="listShow">
+      <div class="list-header">
+        <h1 class="title">购物车</h1>
+        <span class="empty">清空</span>
+      </div>
+      <div class="list-content">
+        <ul>
+          <li class="food" v-for="food in selectFoods">
+            <span class="name">{{food.name}}</span>
+            <div class="price">
+              <span>￥{{food.price*food.count}}</span>
+            </div>
+            <div class="cartcontrol-wrapper">
+              <cartcontrol :food="food"></cartcontrol>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import cartcontrol from 'components/cartcontrol/cartcontrol';
+
 export default {
   props: {
     selectFoods: {
@@ -50,7 +70,7 @@ export default {
     }
   },
   data() {
-      return: {
+      return {
         balls: [
           {
             show: false
@@ -67,7 +87,9 @@ export default {
           {
             show: false
           }
-        ]
+        ],
+        dropBalls: [],
+        fold: true
       };
   },
   computed: {
@@ -101,7 +123,74 @@ export default {
           return 'not-enough';
       }
       return 'enough';
+    },
+    listShow() {
+      if (!this.totalCount) {
+        this.fold = true;
+        return false;
+      }
+      console.log('111', this.totalCount, '----', this.fold);
+      let show = !this.fold;
+      return show;
     }
+  },
+  methods: {
+    drop (el) {
+      for (let i = 0; i < this.balls.length; i++) {
+        let ball = this.balls[i];
+        if (!ball.show) {
+          ball.show = true;
+          ball.el = el;
+          this.dropBalls.push(ball);
+          return;
+        }
+      }
+    },
+    beforeEnter(el) {
+      let count = this.balls.length;
+      while (count--) {
+        let ball = this.balls[count];
+        if (ball.show) {
+          let rect = ball.el.getBoundingClientRect();
+          let x = rect.left - 32;
+          let y = -(window.innerHeight - rect.top - 22);
+          el.style.display = '';
+          el.style.webkitTransform = `translate3d(0, ${y}px, 0)`;
+          el.style.transform = `translate3d(0, ${y}px, 0)`;
+          let inner = el.getElementsByClassName('inner-hook')[0];
+          inner.style.webktTransform = `translate3d(${x}px, 0, 0)`;
+          inner.style.transform = `translate3d(${x}px, 0, 0)`;
+        }
+      }
+    },
+    enter(el) {
+      /* eslint-disable no-unused-vars */
+      let rf = el.offsetHeight;
+      this.$nextTick(() => {
+        el.style.webkitTransform = 'translate3d(0, 0px, 0)';
+        el.style.transform = 'translate3d(0, 0px, 0)';
+        let inner = el.getElementsByClassName('inner-hook')[0];
+        inner.style.webktTransform = 'translate3d(0px, 0, 0)';
+        inner.style.transform = 'translate3d(0px, 0, 0)';
+      });
+    },
+    afterEnter(el) {
+      let ball = this.dropBalls.shift();
+      if (ball) {
+        ball.show = false;
+        el.style.display = 'none';
+      }
+    },
+    toggleList() {
+      if (!this.totalCount) {
+        return;
+      }
+      console.log(this.fold, this.totalCount);
+      this.fold = !this.fold;
+    }
+  },
+  components: {
+    cartcontrol
   }
 };
 </script>
@@ -203,11 +292,11 @@ export default {
         left: 32px
         bottom: 22px
         z-index: 200
-        transition: all 0.4s
-          .inner
-            width: 16px
-            height: 16px
-            border-radius: 50%
-            background: rgb(0,160,220)
-            transition: all 0.4s
+        transition: all 0.4s cubic-bezier(0.49,-0.29,0.75,0.41)
+        .inner
+          width: 16px
+          height: 16px
+          border-radius: 50%
+          background: rgb(0,160,220)
+          transition: all 0.4s linear
 </style>
