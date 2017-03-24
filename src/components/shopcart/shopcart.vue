@@ -27,12 +27,13 @@
         </div>
       </transition>
     </div>
-    <div class="shopcart-list" v-show="listShow">
+    <transition name="fold">
+      <div class="shopcart-list" v-show="listShow">
       <div class="list-header">
         <h1 class="title">购物车</h1>
         <span class="empty">清空</span>
       </div>
-      <div class="list-content">
+      <div class="list-content" ref="listContent">
         <ul>
           <li class="food" v-for="food in selectFoods">
             <span class="name">{{food.name}}</span>
@@ -46,10 +47,12 @@
         </ul>
       </div>
     </div>
+    </transition>
   </div>
 </template>
 
 <script>
+import BScroll from 'better-scroll';
 import cartcontrol from 'components/cartcontrol/cartcontrol';
 
 export default {
@@ -129,8 +132,18 @@ export default {
         this.fold = true;
         return false;
       }
-      console.log('111', this.totalCount, '----', this.fold);
       let show = !this.fold;
+      if (show) {
+        this.$nextTick(() => {
+          if (!this.scroll) {
+            this.scroll = new BScroll(this.$refs.listContent, {
+              click: true
+            });
+          } else {
+            this.scroll.refresh();
+          }
+        });
+      }
       return show;
     }
   },
@@ -185,7 +198,6 @@ export default {
       if (!this.totalCount) {
         return;
       }
-      console.log(this.fold, this.totalCount);
       this.fold = !this.fold;
     }
   },
@@ -196,6 +208,7 @@ export default {
 </script>
 
 <style lang="stylus">
+  @import "../../common/stylus/mixin.styl"
   .shopcart
     position: fixed
     left: 0
@@ -299,4 +312,54 @@ export default {
           border-radius: 50%
           background: rgb(0,160,220)
           transition: all 0.4s linear
+    .shopcart-list
+      position: absolute
+      top: 0
+      left: 0
+      z-index: -1
+      width: 100%
+      transition: all 0.5s
+      transform: translate3d(0, -100%, 0)
+      &.fold-enter, &.fold-leave-active
+        transform: translate3d(0, 0, 0)
+      .list-header
+        height: 40px
+        line-height: 40px
+        padding: 0 18px
+        background: #f3f5f7
+        border-bottom: 1px solid rgba(7,17,27,0.1)
+        .title
+          float: left
+          font-size: 14px
+          color: rgb(7,17,27)
+        .empty
+          float: right
+          font-size: 12px
+          color: rgb(0,260,220)
+      .list-content
+        padding: 0 18px
+        max-height: 217px
+        overflow: hidden
+        background: #fff
+        .food
+          position: relative
+          padding: 12px 0
+          box-sizing: border-box
+          border-1px(rgba(7,17,27,0.1))
+          .name
+            line-height: 14px
+            font-size: 14px
+            color: rgb(7,17,27)
+          .price
+            position: absolute
+            right: 90px
+            bottom: 12px
+            line-height: 24px
+            font-size: 14px
+            font-weight: 700
+            color: rgb(240,20,20)
+          .cartcontrol-wrapper
+            position: absolute
+            right: 0
+            bottom: 6px
 </style>
